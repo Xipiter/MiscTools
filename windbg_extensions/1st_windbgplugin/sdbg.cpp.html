@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+	<head>
+		<title>../xanadu/win_misc/windbg_extension/ext_test/sdbg.cpp</title>
+		<meta name="generator" content="c2html 1.0 b" >
+		<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1" >
+		<meta http-equiv="Content-Script-Type" content="text/javascript" >
+		<meta http-equiv="Content-Style-Type" content="text/css" >
+	</head>
+	<body text="#000000">
+		<font face="Monospace">
+<font color="#808080"><i>//&nbsp;sdbg.cpp&nbsp;:&nbsp;an&nbsp;attempt&nbsp;at&nbsp;a&nbsp;WinDBG&nbsp;extension.<br></font></i>
+<font color="#808080"><i>//&nbsp;My&nbsp;first&nbsp;windows&nbsp;program&nbsp;EVAR!&nbsp;Stephen&nbsp;12Nov2004<br></font></i>
+<font color="#808080"><i>//&nbsp;Props&nbsp;to&nbsp;Lawler&nbsp;for&nbsp;help&nbsp;with&nbsp;the&nbsp;windowsisms.<br></font></i>
+<font color="#808080"><i>//&nbsp;Promps&nbsp;to&nbsp;Mike&nbsp;for&nbsp;his&nbsp;emotional&nbsp;support.<br></font></i>
+<font color="#808080"><i>//<br></font></i>
+<font color="#808080"><i>//&nbsp;Buildin'&nbsp;this&nbsp;shit&nbsp;commandline&nbsp;stylez:<br></font></i>
+<font color="#808080"><i>//&nbsp;1.&nbsp;run&nbsp;vcvars32.bat&nbsp;to&nbsp;set&nbsp;ENV<br></font></i>
+<font color="#808080"><i>//&nbsp;2.&nbsp;cl&nbsp;sdbg.cpp&nbsp;/IC:\WINDDK\2600.1106\inc\w2k&nbsp;/c<br></font></i>
+<font color="#808080"><i>//&nbsp;3.&nbsp;link&nbsp;/dll&nbsp;/def:sdbg.def&nbsp;sdbg.obj&nbsp;&nbsp;&lt;---&nbsp;my&nbsp;.def&nbsp;is&nbsp;below&nbsp;DONT&nbsp;EXCLUDE&nbsp;/DLL&nbsp;<br></font></i>
+<font color="#808080"><i>//&nbsp;4.&nbsp;peview&nbsp;sdbg.dll&nbsp;&nbsp;&lt;-----&nbsp;like&nbsp;&quot;nm&quot;&nbsp;to&nbsp;check&nbsp;that&nbsp;all&nbsp;the&nbsp;shit&nbsp;we&nbsp;wanted&nbsp;exported,&nbsp;was&nbsp;done&nbsp;properly&nbsp;in&nbsp;the&nbsp;Address&nbsp;Table&nbsp;in&nbsp;.rdata&nbsp;<br></font></i>
+<br>
+<font color="#808080"><i>//My&nbsp;.def&nbsp;looked&nbsp;like&nbsp;this:<br></font></i>
+<font color="#808080"><i>//LIBRARY&nbsp;&quot;sdbg.dll&quot;<br></font></i>
+<font color="#808080"><i>//<br></font></i>
+<font color="#808080"><i>//EXPORTS<br></font></i>
+<font color="#808080"><i>//&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;WinDbgExtensionDllInit<br></font></i>
+<font color="#808080"><i>//&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ExtensionApiVersion<br></font></i>
+<font color="#808080"><i>//&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;satori<br></font></i>
+<font color="#808080"><i>//&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;satorihelp<br></font></i>
+<br>
+<font color="#808080"><i>//&nbsp;Inside&nbsp;windbg&nbsp;load&nbsp;the&nbsp;module&nbsp;with&nbsp;!load&nbsp;&lt;PATH&gt;sdbg.dll&nbsp;in&nbsp;the&nbsp;command&nbsp;window<br></font></i>
+<br>
+<font color="#008000">#define&nbsp;_WIN32_WINNT&nbsp;0x500&nbsp;</font><font color="#808080"><i>//directive&nbsp;for&nbsp;CL&nbsp;to&nbsp;get&nbsp;all&nbsp;its&nbsp;OS-specific&nbsp;shit<br></font></i>
+<font color="#008000">#include&nbsp;&lt;windows.h&gt;&nbsp;</font><font color="#808080"><i>//CL&nbsp;is&nbsp;dumb&nbsp;it&nbsp;needs&nbsp;to&nbsp;know&nbsp;*EVERYTHING*.<br></font></i>
+<font color="#008000">#include&nbsp;&lt;winnt.h&gt;&nbsp;<br></font>
+<font color="#008000">#include&nbsp;&quot;wdbgexts.h&quot;&nbsp;</font><font color="#808080"><i>//WinDBG&nbsp;API&nbsp;shit.<br></font></i>
+<font color="#008000">#include&nbsp;&quot;ntsdexts.h&quot;&nbsp;</font><font color="#808080"><i>//If&nbsp;you&nbsp;are&nbsp;looking&nbsp;for&nbsp;documentation&nbsp;on&nbsp;the&nbsp;DDK&nbsp;debug&nbsp;APIs,&nbsp;this&nbsp;is&nbsp;prolly&nbsp;the&nbsp;best&nbsp;place&nbsp;to&nbsp;start.<br></font></i>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#808080"><i>//Depending&nbsp;the&nbsp;version&nbsp;of&nbsp;your&nbsp;DDK,&nbsp;functions&nbsp;exported&nbsp;by&nbsp;the&nbsp;WinDBG&nbsp;APIs&nbsp;might&nbsp;be&nbsp;also&nbsp;in&nbsp;windbgexts.h<br></font></i>
+<br>
+<font color="#808080"><i>//This&nbsp;is&nbsp;the&nbsp;Global&nbsp;struct&nbsp;for&nbsp;versioning<br></font></i>
+<font color="#808080"><i>//EXT_API_VERSION&nbsp;declared&nbsp;in&nbsp;wdbgexts.h<br></font></i>
+EXT_API_VERSION&nbsp;g_ExtApiVersion&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#0000FF">5</font>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#0000FF">5</font>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;EXT_API_VERSION_NUMBER,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#0000FF">0</font><br>
+};<br>
+<br>
+<font color="#000000"><b>extern</font></b>&nbsp;<font color="#FF0000">&quot;C&quot;</font>&nbsp;LPEXT_API_VERSION&nbsp;WDBGAPI&nbsp;ExtensionApiVersion(<font color="#800000">void</font>)&nbsp;<font color="#808080"><i>//Any&nbsp;functions&nbsp;exported&nbsp;get&nbsp;__declspec(dllexport)&nbsp;a&nbsp;directive&nbsp;for&nbsp;CL&nbsp;to&nbsp;flag&nbsp;function&nbsp;for&nbsp;linker<br></font></i>
+<font color="#808080"><i>//&nbsp;purpose:&nbsp;WinDBG&nbsp;calls&nbsp;this&nbsp;function&nbsp;to&nbsp;get&nbsp;the&nbsp;version&nbsp;of&nbsp;our&nbsp;API<br></font></i>
+<font color="#808080"><i>//&nbsp;params:&nbsp;void<br></font></i>
+<font color="#808080"><i>//&nbsp;returns:&nbsp;pointer&nbsp;to&nbsp;EXT_API_VERSION&nbsp;struct<br></font></i>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000"><b>return</font></b>&nbsp;&amp;g_ExtApiVersion;<br>
+};<br>
+<br>
+<br>
+<font color="#000000"><b>extern</font></b>&nbsp;<font color="#FF0000">&quot;C&quot;</font>&nbsp;VOID&nbsp;WDBGAPI&nbsp;WinDbgExtensionDllInit&nbsp;(PWINDBG_EXTENSION_APIS&nbsp;lpExtensionApis,&nbsp;USHORT&nbsp;usMajorVersion,&nbsp;USHORT&nbsp;usMinorVersion)&nbsp;<br>
+<font color="#808080"><i>//purpose:&nbsp;WinDBG&nbsp;calls&nbsp;this&nbsp;function&nbsp;to&nbsp;initialize&nbsp;our&nbsp;API<br></font></i>
+<font color="#808080"><i>//params:&nbsp;pointer&nbsp;to&nbsp;API&nbsp;functions,&nbsp;Major&nbsp;Version,&nbsp;Minor&nbsp;Version<br></font></i>
+<font color="#808080"><i>//returns:&nbsp;nan&nbsp;demo&nbsp;nai<br></font></i>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ExtensionApis&nbsp;=&nbsp;*lpExtensionApis;<br>
+};<br>
+<br>
+<font color="#808080"><i>//Global&nbsp;Variable&nbsp;Needed&nbsp;for&nbsp;Functions<br></font></i>
+WINDBG_EXTENSION_APIS&nbsp;ExtensionApis&nbsp;=&nbsp;{<font color="#0000FF">0</font>};<br>
+<br>
+<br>
+<font color="#808080"><i>//The&nbsp;DECLARE_API&nbsp;is&nbsp;defined&nbsp;in&nbsp;ntsdexts.h&nbsp;but&nbsp;CL&nbsp;was&nbsp;bitching&nbsp;about&nbsp;not&nbsp;finding&nbsp;the&nbsp;DEFINE&nbsp;in&nbsp;our&nbsp;headers<br></font></i>
+<font color="#808080"><i>//so&nbsp;we&nbsp;cut&nbsp;and&nbsp;pasted&nbsp;it&nbsp;here&nbsp;to&nbsp;get&nbsp;it&nbsp;to&nbsp;shut-the-mutherfuck-up.<br></font></i>
+<font color="#008000">#undef&nbsp;DECLARE_API<br></font>
+<font color="#008000">#define&nbsp;DECLARE_API(s)&nbsp;\<br></font>
+&nbsp;&nbsp;&nbsp;&nbsp;CPPMOD&nbsp;VOID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<br>
+&nbsp;&nbsp;&nbsp;&nbsp;s(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hCurrentProcess,&nbsp;&nbsp;&nbsp;&nbsp;\<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hCurrentThread,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ULONG&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dwCurrentPc,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ULONG&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dwProcessor,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PCSTR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;args&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br>
+<br>
+DECLARE_API&nbsp;(satorihelp)&nbsp;<br>
+<font color="#808080"><i>//!satorihelp<br></font></i>
+<font color="#808080"><i>//purpose:&nbsp;WinDBG&nbsp;will&nbsp;call&nbsp;this&nbsp;function&nbsp;in&nbsp;our&nbsp;API&nbsp;when&nbsp;the&nbsp;user&nbsp;types&nbsp;!satorihelp<br></font></i>
+<font color="#808080"><i>//params:&nbsp;nan&nbsp;demo&nbsp;nai<br></font></i>
+<font color="#808080"><i>//returns:&nbsp;nan&nbsp;demo&nbsp;nai<br></font></i>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dprintf(<font color="#FF0000">&quot;Our&nbsp;test&nbsp;Debug&nbsp;Extension.&nbsp;YAY!\n\n&quot;</font>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dprintf(<font color="#FF0000">&quot;The&nbsp;contents&nbsp;of&nbsp;our&nbsp;\&quot;Help&nbsp;Page\&quot;&nbsp;would&nbsp;go&nbsp;here!\n&quot;</font>);<br>
+};<br>
+<br>
+<br>
+DECLARE_API&nbsp;(satori)&nbsp;<br>
+<font color="#808080"><i>//!satori<br></font></i>
+<font color="#808080"><i>//purpose:&nbsp;WinDBG&nbsp;will&nbsp;call&nbsp;this&nbsp;function&nbsp;in&nbsp;our&nbsp;API&nbsp;when&nbsp;the&nbsp;user&nbsp;types&nbsp;!satori<br></font></i>
+<font color="#808080"><i>//params:&nbsp;We&nbsp;can&nbsp;accept&nbsp;params&nbsp;but&nbsp;we&nbsp;arent&nbsp;gonna&nbsp;do&nbsp;that&nbsp;shit&nbsp;yet&nbsp;cuz&nbsp;this&nbsp;might&nbsp;not&nbsp;even&nbsp;work.<br></font></i>
+<font color="#808080"><i>//returns:&nbsp;are&nbsp;you&nbsp;fucking&nbsp;kidding!?&nbsp;did&nbsp;you&nbsp;read&nbsp;the&nbsp;line&nbsp;above?<br></font></i>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dprintf&nbsp;(<font color="#FF0000">&quot;\nWe&nbsp;are&nbsp;actually&nbsp;inside&nbsp;our&nbsp;function&nbsp;now,&nbsp;YAY!\n&quot;</font>);<br>
+};<br>
+<br>
+		</font>
+	</body>
+</html>

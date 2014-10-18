@@ -1,0 +1,43 @@
+<head><title>JS objbrowse</title>
+<style>
+li {
+    list-style-type: none;
+    cursor: pointer;
+}
+</style>
+</head>
+<body>
+<h1>Javascript Object Browser</h1>
+<script type="text/javascript">
+
+idx = 0;
+
+function expand(o, e, i, a)
+{
+    document.getElementById(e).innerHTML = ul_for_i(i, a + '.');
+    o.onclick = function() { contract(o, e, i, a); };
+}
+
+function contract(o, e, i, a)
+{
+    document.getElementById(e).innerHTML = '';
+    o.onclick = function() { expand(o, e, i, a); };
+}
+
+function ul_for_i(e, a)
+{
+    r = '<ul>';
+    for(i in e) {
+        r = r + '<li><p onclick="expand(this, \'cnt'+idx+'\', ' + a + i + ', \''+a+i+'\');">' + i + '</p>'
+        r = r + '<div id="cnt' + idx + '"></div>';
+        r = r + '</li>';
+        idx = idx + 1;
+    }
+    r = r + '</ul>';
+    return r;
+}
+
+document.write(ul_for_i(this, ''));
+
+</script>
+</body>

@@ -1,0 +1,9 @@
+EXPORTS
+	WinDbgExtensionDllInit
+	ExtensionApiVersion
+	countheaps
+	dumpstackstrings
+	dumpheapstrings
+	findp2p
+	stack
+	helpme

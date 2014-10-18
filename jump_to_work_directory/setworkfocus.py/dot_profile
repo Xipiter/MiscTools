@@ -1,0 +1,24 @@
+# .bashrc
+
+# User specific aliases and functions
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+        . /etc/bashrc
+fi
+export EDITOR=vim
+alias ls='ls -G'
+#alias "svn add"="svn add --force"
+export PATH=/opt/local/bin:/opt/local/sbin:/usr/local/bin:$PATH
+export PATH=$PATH:~/.bin
+export WORKFOCUS=/Users/s7ephen
+echo -ne "\n\n\t************ WORKFOCUS **************"
+echo -ne "\n\t$WORKFOCUS"
+echo -ne "\n\t*************************************\n\n"
+cd $WORKFOCUS
+#next line by phil so sudo'ed X binaries will work properly.
+
+# Setting PATH for MacPython 2.5
+# The orginal version is saved in .profile.pysave
+PATH="/Library/Frameworks/Python.framework/Versions/Current/bin:${PATH}"
+export PATH

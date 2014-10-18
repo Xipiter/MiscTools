@@ -1,0 +1,7 @@
+LIBRARY "sdbg.dll"
+
+EXPORTS
+	WinDbgExtensionDllInit
+	ExtensionApiVersion
+	satori
+	satorihelp

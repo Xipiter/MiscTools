@@ -1,0 +1,174 @@
+<html><head>
+
+<title>BOM for Unicode UTF-8, UTF-16, UTF-16LE, UTF-16BE</title><meta name="description" content="Excel csv and Unicode UTF-8 UTF-16, UTF-16LE, UTF-16BE, BOM, bug tracking, defect tracking, and issue tracking software manager">
+<meta name="keywords" content="Excel,csv,Unicode UTF-8 UTF-16, UTF-16LE, UTF-16BE, BOM,bug tracking,issue tracking,defect tracking">
+<meta name="comments" content="Excel,csv,Unicode UTF-8 UTF-16, UTF-16LE, UTF-16BE, BOM,bug, defect, issue, incident tracking database software"></head>
+<body topmargin="2">
+<table bgcolor="#ffffff" border="0" cellpadding="2" cellspacing="2" width="95%">
+<tbody><tr><td>
+<a href="http://www.websina.com/index.html"><img src="unicode-bom_files/logo.jpg" alt="Excel,csv,Unicode UTF-8 UTF-16, UTF-16LE, UTF-16BE, BOM,bug tracking and defect tracking" border="0"></a>
+</td></tr>
+<tr><td align="right">
+<a href="http://www.websina.com/index.html">Home</a> &gt;
+<a href="http://www.websina.com/bugzero/index.html">Bugzero</a> &gt; <a href="http://www.websina.com/bugzero/faq.html#kb">FAQs</a>
+&gt; KB
+</td></tr>
+</tbody></table>
+
+<h2>Byte Order Mark FAQ (from www.unicode.org)</h2>
+        
+<p>Q: What is a BOM?</p>   
+<p>A: A <i>byte order mark </i>(BOM) consists of the character 
+code U+FEFF at the beginning of a data stream, where it can be used  
+as a signature defining the byte order and encoding form, primarily of
+unmarked plaintext files. Under some higher level protocols, use of
+a BOM may be mandatory 
+(or prohibited) in the Unicode data stream defined in that protocol. 
+</p>
+
+<p>Q: Where is a BOM useful?</p>   
+<p>A: A BOM is useful at the beginning of files that are typed as   
+text, but for which it is not known whether they are in big or little endian format-it 
+can also serve as a hint indicating that the file is in Unicode, as 
+opposed to in a legacy encoding and furthermore, it act as a signature 
+for the specific encoding form used .
+</p>
+  
+<p>Q: What does &#8216;endian&#8217; mean?</p>  
+<p>A: Data types longer than a byte can be stored in computer 
+memory with the most significant byte (MSB) first or last. The former is 
+called big-endian, the latter little-endian. When data are exchange in 
+the same byte order as they were in the memory of the originating 
+system, they may appear to be in the wrong byte order on the receiving 
+system. In that situation, a BOM would look like 0xFFFE which is a 
+noncharacter, allowing the receiving system to apply byte reversal 
+before processing the data. UTF-8 is byte oriented and therefore does 
+not have that issue. Nevertheless, an initial BOM might be useful to 
+identify the datastream as UTF-8.
+</p> 
+<p>Q: When a BOM is used, is it only in 16-bit Unicode text?</p>   
+<p>A: No, a BOM can be used as a signature no matter how the 
+Unicode text is transformed: UTF-16, UTF-8, UTF-7, etc. The exact bytes 
+comprising the BOM will be whatever the Unicode character FEFF is 
+converted into by that transformation format. In that form, the BOM 
+serves to indicate both that it is a Unicode file, and which of the 
+formats it is in. Examples:</p>
+
+        <div align="center">
+          <center>
+          <table border="1" cellpadding="2" cellspacing="0">
+            <tbody><tr>
+              <th width="50%">Bytes</th>
+              <th width="50%">Encoding Form</th>
+            </tr>
+            <tr>
+
+              <td width="50%">00 00 FE FF</td>
+              <td width="50%">UTF-32, big-endian</td>
+            </tr>
+            <tr>
+              <td width="50%">FF FE 00 00</td>
+              <td width="50%">UTF-32, little-endian</td>
+            </tr>
+
+            <tr>
+              <td width="50%">FE FF</td>
+              <td width="50%">UTF-16, big-endian</td>
+            </tr>
+            <tr>
+              <td width="50%">FF FE</td>
+              <td width="50%">UTF-16, little-endian</td>
+
+            </tr>
+            <tr>
+              <td width="50%">EF BB BF</td>
+              <td width="50%">UTF-8</td>
+            </tr>
+          </tbody></table>
+          </center>
+        </div>
+
+<p>Q: Can a UTF-8 data stream contain the BOM    
+character (in UTF-8 form)? If yes, then can I still assume the remaining    
+UTF-8 bytes are in big-endian order?</p>   
+<p>A: Yes, UTF-8 can contain a BOM. However, it makes <i>no</i>  
+difference as to the endianness of the byte stream. UTF-8 always has the  
+same byte order. An initial BOM is <i>only</i> used as a signature &#8212; an  
+indication that an otherwise unmarked text file is in UTF-8. Note that 
+some recipients of UTF-8 encoded data do not expect a BOM. Where UTF-8 
+is used<i> transparently</i> in 8-bit environments, the use of a BOM 
+will interfere with any protocol or file format that expects specific 
+ASCII characters at the beginning, such as the use of "#!" of at the 
+beginning of Unix shell scripts.
+
+</p><p>Q: What should I do with U+FEFF in the middle of a file?</p>   
+<p>A: In the absence of a protocol supporting its use as a BOM and when not at the   
+beginning of a text stream, U+FEFF should normally not occur. For 
+backwards compatibility it should be treated as ZERO WIDTH  
+NON-BREAKING SPACE (ZWNBSP),   
+and is then part of the content of the file or string. The use of  
+U+2060 WORD JOINER is strongly preferred over ZWNBSP for expressing word joining 
+semantics since it cannot be confused with a BOM. When designing a markup 
+language or data protocol, the use of U+FEFF can be restricted to that 
+of Byte Order Mark. In that case, any U+FEFF occurring in the middle of 
+the file can be ignored, or treated as an error. 
+</p>
+
+<p>Q: I am using a protocol that has BOM at    
+the start of text. How do I represent an initial ZWNBSP?</p>   
+<p>A: Use U+2060 WORD JOINER instead.</p>  
+
+<p>Q: How do I tag data that does not interpret FEFF as a BOM?</p>   
+<p>A: Use the tag <tt>UTF-16BE</tt> to indicate big-endian  
+UTF-16 text, and <tt>UTF-16LE</tt> to indicate little-endian UTF-16  
+text. If you do use a BOM, tag the text as simply <tt>UTF-16</tt>. 
+</p>
+
+<p>Q: Why wouldn&#8217;t I always use a protocol that requires a BOM?</p>   
+<p>A: Where the data is typed, such as a field in a database,  
+a BOM is unnecessary. In particular, if a text data stream is marked as  
+UTF-16BE, UTF-16LE, UTF-32BE or UTF-32LE, a BOM is neither necessary nor <i>permitted</i>. 
+Any FEFF would be interpreted as a ZWNBSP.</p>
+<p>Do not tag every string in a database or set of fields with a BOM, 
+since it wastes space and complicates string concatenation. Moreover, it also means two data fields may have  
+precisely the same content, but not be binary-equal (where one is  
+prefaced by a BOM).</p> 
+<p>Q: How I should deal with BOMs?</p>   
+<p>A: Here are some guidelines to follow: </p>
+<ol>
+          <li>
+          <p class="a">A particular protocol (e.g. Microsoft conventions for 
+          .txt files) may require use of the BOM on certain Unicode data 
+          streams, such as files. When you need to conform to such a protocol, 
+          use a BOM. 
+          </p></li><li>
+          <p class="a">Some protocols allow optional BOMs in the case of 
+          untagged text. In those cases,
+          </p><ul>
+            <li>
+            <p class="a">Where a text data stream is known to be plain text, but 
+            of unknown encoding, BOM can be used as a signature. If there is no 
+            BOM, the encoding could be anything.
+            </p></li><li>
+
+            <p class="a">Where a text data stream is known to be plain Unicode 
+            text (but not which endian), then BOM can be used as a signature. If 
+            there is no BOM, the text should be interpreted as big-endian.
+          </p></li></ul>
+          </li>
+          <li>
+		<p class="a">Some byte oriented protocols expect ASCII characters at 
+		the beginning of a file. If UTF-8 is used with these protocols, use 
+		of the BOM as encoding form signature should be avoided.
+          </p></li><li>
+        <p class="a">Where the precise type of the data stream is known (e.g.  
+        Unicode big-endian or Unicode little-endian), the BOM should not be  
+        used. In particular, whenever a data stream is declared to be 
+	UTF-16BE, UTF-16LE, UTF-32BE or UTF-32LE a BOM <i>must</i> not be 
+	used. 
+</p></li></ol>
+
+<p>&gt;&gt;
+<a href="http://www.websina.com/bugzero/index.html">May we recommend you a product for tracking software bugs and customer support issues?
+try Bugzero</a>!
+</p></body></html>

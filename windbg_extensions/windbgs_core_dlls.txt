@@ -1,0 +1,7 @@
+DLL's used by WinDBG
+
+ModLoad: 01400000 014ae000   C:\Program Files\Debugging Tools for Windows\winext\ext.dll
+ModLoad: 01800000 01810000   C:\Program Files\Debugging Tools for Windows\winext\uext.dll
+ModLoad: 4ee80000 4ee99000   C:\Program Files\Debugging Tools for Windows\W2KFre\ntsdexts.dll
+ModLoad: 009c0000 009db000   C:\Program Files\Debugging Tools for Windows\srcsrv.dll
+ModLoad: 690a0000 690ab000   C:\WINNT\system32\psapi.dll
