@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-bashrc = os.getenv("HOME")+"/.profile"
+bashrc = os.getenv("HOME")+"/.bash_profile"
 cwd = os.getcwd()
 #print bashrc
 lines = []
