@@ -3,9 +3,9 @@ SetWorkFocus
 
 This is just a simple thing to let you run the command "setworkfocus" from
 anywhere. It will then take your current working directory and smash it into
-your bash profile, so that next time you open a shell it drops you into your
-"workfocus" directory. If you are like me you spend time deep in Git/SVN checkouts
-or on weird file share paths that SUUUUCK to type in all the time....this fixes that.
+your bash profile, so that next time that you open a shell it drops you into your
+"workfocus" directory. If you are like me, you spend most of your time deep in Git/SVN checkouts
+or on weird file share paths all of which SUUUUCK to type in to get to in a new terminal ....this fixes that.
 
 # Installation
 1. Make the .py or .rb (whichever version you choose to use) executable and copy to your $PATH(i.e. /usr/bin)
