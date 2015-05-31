@@ -1,0 +1,61 @@
+S1C Flatline
+---------------------
+stephen@sa7ori.org
+
+The flatline sits between the user and their shell, virtually transparently.
+It allows the user to write into their shell (like STDIN) by writing to a device (fifo)
+on the filesystem. This is particularly useful for bouncing from shell to shell.
+Take this for example:
+USER connects to HOST C in the following roundabout way.
+
+  ----                  ------                  ------                     ------ 
+ |USER| ----(ssh)----> |HOST A| ----(rsh)----> |HOST B| ----(telnet)----> |HOST C|
+  ----                  ------                  ------                     ------
+He travels over the river and through the woods, past friend, fiend, foe, and firewall.
+However, he needs to get a LARGE file to HOST C with a minimal amount of effort,
+and this is his only method in. Whatever will he do? Then USER remembers that he ran s1cflatline -u
+on his host before he ssh'ed in to HOST A. Now all he has to do is go to another term
+on his host and do something simple like this:
+
+USER% echo -ne "cat >> bigassfile.tgz.uu\n" >> $PATH_TO_S1CFLATLINE/.s1cflatlinefifo; 
+USER% uuencode bigassfile.tgz bigassfile.tgz.uu $PATH_TO_S1CFLATLINE/.s1cflatlinefifo;
+
+then back on the terminal he hits CTRL-D to EOF the 'cat' command he issue. and VIOLA, the file
+has been transferred THROUGH his terminal as though he typed it all in manually!
+**note** presently, because of the way this traps the uu-headers, if you send to the server this way, it will
+also make a copy of the file in the directory you executed s1cflatline in. I need to fix this eventually.
+ 
+S1C Flatline also has a neat little feature that (when given the -u option) will trap UUENCODE
+lines its sees occurring on the remote host. It will trap the output and then automatically "download"
+and uudecode that file locally on the USER's host. so essentially to GET files all the user does 
+is something like this:
+
+HOSTC% uuencode file.tgz file.tgz;
+
+The uucrap will scroll past and be trapped by s1cflatline.
+and thats it!, the file will be on the USER's host already uudecoded!
+**note** presently, because of the way this traps the uu-headers, if you cat uu encoded text
+to s1cflatline, it will also be caught by the filters that trap it coming from s1cflatline, and will thus
+make a copy of the file in the directory you executed s1cflatline in. I need to fix this eventually.
+
+Compilation:
+-------------
+On most systems the following will do:
+
+% make && make install
+
+***NOTE*** s1cflatline MUST be executed in the directory it was created in the environment depends on things done in make.
+
+Shouts:
+-----
+--> i1l, cain, jamesw, flata, Dave, tuxy, n1chodemus, el8, Tim Lawless
+
+Credits/Thanks:
+---------------
+>	Satoru Takabayashi <satoru@namazu.org> and Arkadiusz Mi¶kiewicz <misiek@misiek.eu.org>
+	for providing the vast majority of the skeleton in 'ttyrecord'
+
+TODO:
+-----
+It would be cool to expand this do to predictive analysis, maybe even trap Keystrokes so that
+Notes can be taken, kinda like how screen has a pretty extensive layer of features above the shell.
