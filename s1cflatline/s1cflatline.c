@@ -5,7 +5,7 @@
 	
 	Before you lambaste me for how disgusting the code below is, I must remind you that 
 		I CANT CODE!!!!!
-	sa7ori@tasam.com
+	sa7ori@tasam.com 2003
 */
 
 #include "s1cflatline.h"

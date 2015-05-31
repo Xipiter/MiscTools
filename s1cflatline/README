@@ -1,6 +1,7 @@
 S1C Flatline
 ---------------------
-stephen@sa7ori.org
+sa7ori@tasam.com 2003 Originally published here: http://sourceforge.net/projects/s1cflatline/
+stephen@sa7ori.org 2015 
 
 The flatline sits between the user and their shell, virtually transparently.
 It allows the user to write into their shell (like STDIN) by writing to a device (fifo)
